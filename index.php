@@ -6,9 +6,20 @@
         $name = trim($_POST['name']);
         $text = trim($_POST['text']);
 
+//        $name = strip_tags($name);
+//        $text = strip_tags($text);
+
+        $name = htmlspecialchars($name);
+        $text = htmlspecialchars($text);
+
+
+
+
         if ($name != '' && $text != '') {
-            $query = $db->prepare("INSERT INTO comments SET name='$name', text='$text'");
-            $query->execute();
+            $query = $db->prepare("INSERT INTO comments SET name=:name, text=:text");
+
+            $params = ['name' => $name, 'text' => $text];
+            $query->execute($params);
 
 
             header("Location: index.php");
@@ -16,10 +27,14 @@
         }
     }
 
-    $query = $db->prepare("INSERT INTO comments ORDER BY DT DESC ");
+    $query = $db->prepare("SELECT * FROM comments WHERE is_moderate='1' ORDER BY dt DESC ");
 
     $query->execute();
     $comments = $query->fetchAll();
+
+//    echo '<pre>';
+//    print_r($comments);
+//    echo '</pre>';
 ?>
 
 <form method="post">
@@ -31,11 +46,11 @@
 </form>
 
 <div class="comments">
-    <? foreach ($comments as $one): ?>
+    <?php foreach ($comments as $one): ?>
         <div class="item">
             <span><?=$one['dt']?></span>
             <strong><?=$one['name']?></strong>
             <div><?=$one['text']?></div>
         </div>
-    <? endforeach; ?>
+    <?php endforeach; ?>
 </div>
